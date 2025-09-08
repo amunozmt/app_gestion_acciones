@@ -3,8 +3,9 @@ export interface Transaction {
   id: string;
   date: string; // YYYY-MM-DD
   ticker: string;
-  quantity: number;
+  quantity: number; // Can be negative for sales
   price: number;
+  commission?: number; // Optional commission fee
 }
 
 export interface StockSummary {

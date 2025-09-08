@@ -14,7 +14,12 @@ interface DashboardProps {
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#f59e0b'];
 
-const formatCurrency = (value: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(value);
+const formatCurrency = (value: number) => new Intl.NumberFormat('es-ES', { 
+  style: 'currency', 
+  currency: 'USD', 
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 6 
+}).format(value);
 const formatPercentage = (value: number) => `${value.toFixed(2)}%`;
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -41,7 +46,8 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
     totalCost,
     totalValue,
     totalPL,
-    totalPLPercentage 
+    totalPLPercentage,
+    salesSummary
   } = usePortfolioCalculations(transactions, currentPrices);
   
   const [tickerFilter, setTickerFilter] = useState('all');
@@ -91,6 +97,28 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
           <p className={`summary-card-value ${totalPLPercentage >= 0 ? 'positive' : 'negative'}`}>{formatPercentage(totalPLPercentage)}</p>
         </div>
       </div>
+      
+      {/* Sales Summary */}
+      {salesSummary.salesCount > 0 && (
+        <div className="summary-cards">
+          <div className="summary-card">
+            <h3 className="summary-card-title">Ventas Realizadas</h3>
+            <p className="summary-card-value">{salesSummary.salesCount}</p>
+          </div>
+          <div className="summary-card">
+            <h3 className="summary-card-title">Dinero de Ventas</h3>
+            <p className="summary-card-value">{formatCurrency(salesSummary.totalSalesValue)}</p>
+          </div>
+          <div className="summary-card">
+            <h3 className="summary-card-title">Acciones Vendidas</h3>
+            <p className="summary-card-value">{salesSummary.totalSalesQuantity}</p>
+          </div>
+          <div className="summary-card">
+            <h3 className="summary-card-title">Comisiones Ventas</h3>
+            <p className="summary-card-value">{formatCurrency(salesSummary.totalSalesCommissions)}</p>
+          </div>
+        </div>
+      )}
       
       {/* Charts */}
        <div className="grid xl-grid-cols-2">
@@ -171,7 +199,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
           <table className="table">
             <thead>
               <tr>
-                {['Fecha', 'Ticker', 'Cantidad', 'Precio Compra', 'Coste', 'G/P por Operación', 'Acciones'].map(h => (
+                {['Fecha', 'Ticker', 'Cantidad', 'Precio', 'Comisión', 'Coste Total', 'G/P por Operación', 'Acciones'].map(h => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -181,9 +209,10 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
                 <tr key={t.id}>
                   <td>{t.date}</td>
                   <td className="ticker-cell">{t.ticker}</td>
-                  <td>{t.quantity}</td>
+                  <td className={t.quantity < 0 ? 'negative' : ''}>{t.quantity}</td>
                   <td>{formatCurrency(t.price)}</td>
-                  <td>{formatCurrency(t.quantity * t.price)}</td>
+                  <td>{formatCurrency(t.commission || 0)}</td>
+                  <td>{formatCurrency(Math.abs(t.quantity) * t.price + (t.commission || 0))}</td>
                   <td className={t.pl >= 0 ? 'positive' : 'negative'}>{formatCurrency(t.pl)}</td>
                   <td>
                     <div className="flex items-center gap-4">
