@@ -134,30 +134,30 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-base-200 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-blue-400">Registrar Compra</h2>
+    <div className="control-panel">
+      <div className="card">
+        <h2 className="section-title">Registrar Compra</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-300">Fecha</label>
+          <div className="form-group">
+            <label htmlFor="date" className="form-label">Fecha</label>
             <input
               type="date"
               id="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+              className="form-input"
               required
             />
           </div>
-          <div>
-            <label htmlFor="ticker" className="block text-sm font-medium text-gray-300">Ticker/Acción</label>
+          <div className="form-group">
+            <label htmlFor="ticker" className="form-label">Ticker/Acción</label>
             <input
               type="text"
               id="ticker"
               placeholder="Ej. AAPL"
               value={ticker}
               onChange={(e) => setTicker(e.target.value)}
-              className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+              className="form-input"
               required
               list="ticker-suggestions"
             />
@@ -167,9 +167,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               ))}
             </datalist>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="quantity" className="block text-sm font-medium text-gray-300">Cantidad</label>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="quantity" className="form-label">Cantidad</label>
               <input
                 type="number"
                 id="quantity"
@@ -178,12 +178,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 onChange={(e) => setQuantity(e.target.value)}
                 min="0"
                 step="any"
-                className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+                className="form-input"
                 required
               />
             </div>
-            <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-300">Precio/Acción</label>
+            <div className="form-group">
+              <label htmlFor="price" className="form-label">Precio/Acción</label>
               <input
                 type="number"
                 id="price"
@@ -192,20 +192,20 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 onChange={(e) => setPrice(e.target.value)}
                 min="0"
                 step="any"
-                className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+                className="form-input"
                 required
               />
             </div>
           </div>
-          <button type="submit" className="w-full bg-secondary hover:bg-accent text-white font-bold py-2 px-4 rounded-md transition duration-300">
+          <button type="submit" className="btn btn-primary btn-full">
             Añadir Transacción
           </button>
         </form>
       </div>
 
-      <div className="bg-base-200 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-blue-400">Datos</h2>
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="card">
+        <h2 className="section-title">Datos</h2>
+        <div className="btn-group">
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -213,39 +213,39 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               className="hidden"
               accept=".csv"
             />
-            <button onClick={handleImportClick} className="w-full bg-secondary hover:bg-accent text-white font-bold py-2 px-4 rounded-md transition duration-300">
+            <button onClick={handleImportClick} className="btn btn-primary btn-full">
                 Importar CSV
             </button>
-            <button onClick={handleExport} className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+            <button onClick={handleExport} className="btn btn-secondary btn-full">
                 Exportar CSV
             </button>
         </div>
-        <p className="text-xs text-gray-400 mt-3">
-          El CSV debe tener las columnas: <code className="bg-base-300 p-1 rounded">date,ticker,quantity,price</code>
+        <p className="text-xs mt-3">
+          El CSV debe tener las columnas: <code>date,ticker,quantity,price</code>
         </p>
       </div>
 
-      <div className="bg-base-200 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-blue-400">Precios Actuales</h2>
+      <div className="card">
+        <h2 className="section-title">Precios Actuales</h2>
         <div className="space-y-3">
           {uniqueTickers.length > 0 ? uniqueTickers.map(ticker => (
-            <div key={ticker} className="flex items-center justify-between gap-4">
-              <label htmlFor={`price-${ticker}`} className="font-bold text-lg">{ticker}</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">$</span>
+            <div key={ticker} className="price-input-group">
+              <label htmlFor={`price-${ticker}`} className="price-input-label">{ticker}</label>
+              <div className="price-input-wrapper">
+                <span className="price-input-symbol">$</span>
                 <input
                   type="number"
                   id={`price-${ticker}`}
                   value={currentPrices[ticker] || ''}
                   onChange={(e) => onUpdatePrice(ticker, parseFloat(e.target.value) || 0)}
-                  className="block w-32 bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 pl-7 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+                  className="price-input"
                   placeholder="0.00"
                   min="0"
                   step="any"
                 />
               </div>
             </div>
-          )) : <p className="text-gray-400">Añade una transacción para ver tickers aquí.</p>}
+          )) : <p className="text-sm">Añade una transacción para ver tickers aquí.</p>}
         </div>
       </div>
     </div>

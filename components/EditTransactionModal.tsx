@@ -26,32 +26,31 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ transaction
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 transition-opacity duration-300"
+      className="modal-overlay"
       aria-modal="true"
       role="dialog"
       onClick={onClose}
     >
       <div 
-        className="bg-base-200 p-8 rounded-lg shadow-2xl w-full max-w-md m-4 transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale"
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
-        style={{ animation: 'fade-in-scale 0.3s forwards' }}
       >
-        <h2 className="text-2xl font-bold mb-6 text-blue-400">Editar Transacción</h2>
+        <h2 className="modal-title">Editar Transacción</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="edit-date" className="block text-sm font-medium text-gray-300">Fecha</label>
+          <div className="form-group">
+            <label htmlFor="edit-date" className="form-label">Fecha</label>
             <input
               type="date"
               id="edit-date"
               name="date"
               value={formData.date}
               onChange={handleChange}
-              className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+              className="form-input"
               required
             />
           </div>
-          <div>
-            <label htmlFor="edit-ticker" className="block text-sm font-medium text-gray-300">Ticker/Acción</label>
+          <div className="form-group">
+            <label htmlFor="edit-ticker" className="form-label">Ticker/Acción</label>
             <input
               type="text"
               id="edit-ticker"
@@ -59,13 +58,13 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ transaction
               placeholder="Ej. AAPL"
               value={formData.ticker}
               onChange={(e) => setFormData(prev => ({ ...prev, ticker: e.target.value.toUpperCase() }))}
-              className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+              className="form-input"
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="edit-quantity" className="block text-sm font-medium text-gray-300">Cantidad</label>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="edit-quantity" className="form-label">Cantidad</label>
               <input
                 type="number"
                 id="edit-quantity"
@@ -75,12 +74,12 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ transaction
                 onChange={handleChange}
                 min="0"
                 step="any"
-                className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+                className="form-input"
                 required
               />
             </div>
-            <div>
-              <label htmlFor="edit-price" className="block text-sm font-medium text-gray-300">Precio/Acción</label>
+            <div className="form-group">
+              <label htmlFor="edit-price" className="form-label">Precio/Acción</label>
               <input
                 type="number"
                 id="edit-price"
@@ -90,30 +89,21 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ transaction
                 onChange={handleChange}
                 min="0"
                 step="any"
-                className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
+                className="form-input"
                 required
               />
             </div>
           </div>
-          <div className="flex justify-end gap-4 pt-4">
-             <button type="button" onClick={onClose} className="bg-base-300 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+          <div className="modal-actions">
+             <button type="button" onClick={onClose} className="btn btn-secondary">
                 Cancelar
              </button>
-            <button type="submit" className="bg-secondary hover:bg-accent text-white font-bold py-2 px-4 rounded-md transition duration-300">
+            <button type="submit" className="btn btn-primary">
               Guardar Cambios
             </button>
           </div>
         </form>
       </div>
-      <style>{`
-        @keyframes fade-in-scale {
-          from { transform: scale(0.95); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-        .animate-fade-in-scale {
-          animation: fade-in-scale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
     </div>
   );
 };
