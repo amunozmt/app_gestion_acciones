@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { Transaction, StockSummary, TransactionWithPL, PortfolioHistoryPoint } from '../types';
 
@@ -18,6 +17,8 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
       const currentValue = totalQuantity * currentPrice;
       const totalPL = currentValue - totalCost;
       const totalPLPercentage = totalCost > 0 ? (totalPL / totalCost) * 100 : 0;
+      const averagePL = totalQuantity > 0 ? currentPrice - weightedAveragePrice : 0;
+      const plAfterTax = totalPL > 0 ? totalPL * 0.81 : totalPL; // 19% tax on profits
 
       return {
         ticker,
@@ -28,6 +29,8 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
         currentValue,
         totalPL,
         totalPLPercentage,
+        averagePL,
+        plAfterTax,
       };
     });
   }, [transactions, currentPrices, uniqueTickers]);

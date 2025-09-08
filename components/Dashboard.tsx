@@ -129,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
           <table className="min-w-full divide-y divide-base-300">
             <thead className="bg-base-300">
               <tr>
-                {['Ticker', 'Cantidad', 'Precio Medio', 'Coste Total', 'Precio Actual', 'Valor Actual', 'G/P', 'Rentabilidad (%)'].map(h => (
+                {['Ticker', 'Cantidad', 'Precio Medio', 'Coste Total', 'Precio Actual', 'Valor Actual', 'Ganancia Total', 'Ganancia Media / Acción', 'Ganancia tras Impuestos (19%)', 'Rentabilidad (%)'].map(h => (
                   <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
@@ -144,6 +144,8 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(s.currentPrice)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(s.currentValue)}</td>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.totalPL >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(s.totalPL)}</td>
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.averagePL >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(s.averagePL)}</td>
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.plAfterTax >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(s.plAfterTax)}</td>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.totalPLPercentage >= 0 ? 'text-success' : 'text-danger'}`}>{formatPercentage(s.totalPLPercentage)}</td>
                 </tr>
               ))}

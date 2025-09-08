@@ -16,6 +16,8 @@ export interface StockSummary {
   currentValue: number;
   totalPL: number;
   totalPLPercentage: number;
+  averagePL: number;
+  plAfterTax: number;
 }
 
 export interface TransactionWithPL extends Transaction {

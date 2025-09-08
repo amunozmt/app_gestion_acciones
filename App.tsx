@@ -25,7 +25,7 @@ const App: React.FC = () => {
 
   const uniqueTickers = useMemo(() => {
     const tickers = new Set(transactions.map(t => t.ticker));
-    return Array.from(tickers);
+    return Array.from(tickers).sort();
   }, [transactions]);
 
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
@@ -34,6 +34,15 @@ const App: React.FC = () => {
       id: new Date().getTime().toString(),
     };
     setTransactions(prev => [...prev, newTransaction].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+  };
+  
+  const importTransactions = (newTransactions: Omit<Transaction, 'id'>[]) => {
+    const transactionsWithIds = newTransactions.map((t, index) => ({
+      ...t,
+      id: `${new Date().getTime()}-${index}`,
+    }));
+    setTransactions(prev => [...prev, ...transactionsWithIds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+    alert(`${transactionsWithIds.length} transacciones importadas con éxito.`);
   };
 
   const updateTransaction = (updatedTransaction: Transaction) => {
@@ -73,6 +82,8 @@ const App: React.FC = () => {
           <div className="lg:col-span-1">
             <ControlPanel
               onAddTransaction={addTransaction}
+              onImportTransactions={importTransactions}
+              transactions={transactions}
               uniqueTickers={uniqueTickers}
               currentPrices={currentPrices}
               onUpdatePrice={updateCurrentPrice}

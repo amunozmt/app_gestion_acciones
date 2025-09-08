@@ -1,16 +1,20 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Transaction } from '../types';
 
 interface ControlPanelProps {
   onAddTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  onImportTransactions: (transactions: Omit<Transaction, 'id'>[]) => void;
+  transactions: Transaction[];
   uniqueTickers: string[];
   currentPrices: Record<string, number>;
   onUpdatePrice: (ticker: string, price: number) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({ 
-  onAddTransaction, 
+  onAddTransaction,
+  onImportTransactions,
+  transactions,
   uniqueTickers,
   currentPrices,
   onUpdatePrice 
@@ -19,6 +23,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   const [ticker, setTicker] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('');
   const [price, setPrice] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +38,99 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       setQuantity('');
       setPrice('');
     }
+  };
+
+  const handleExport = () => {
+    if (transactions.length === 0) {
+      alert('No hay transacciones para exportar.');
+      return;
+    }
+    const headers = 'date,ticker,quantity,price';
+    const csvContent = transactions
+      .map(t => `${t.date},${t.ticker},${t.quantity},${t.price}`)
+      .join('\n');
+    
+    const csvData = `${headers}\n${csvContent}`;
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'cartera_acciones.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+        
+        if (lines.length <= 1) {
+          throw new Error('El archivo CSV está vacío o solo contiene la cabecera.');
+        }
+
+        const headerLine = lines[0].trim().toLowerCase().split(',').map(h => h.trim());
+        const requiredHeaders = ['date', 'ticker', 'quantity', 'price'];
+        
+        const headerIndices: Record<string, number> = {};
+        requiredHeaders.forEach(h => {
+          const index = headerLine.indexOf(h);
+          if (index === -1) throw new Error(`Falta la columna requerida en el CSV: ${h}`);
+          headerIndices[h] = index;
+        });
+
+        const importedTransactions: Omit<Transaction, 'id'>[] = [];
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].trim().split(',');
+          if (values.length !== headerLine.length) {
+            console.warn(`Saltando línea ${i+1}: número incorrecto de columnas.`);
+            continue;
+          }
+
+          const date = values[headerIndices.date].trim();
+          const ticker = values[headerIndices.ticker].trim().toUpperCase();
+          const quantity = parseFloat(values[headerIndices.quantity]);
+          const price = parseFloat(values[headerIndices.price]);
+
+          if (!date || !ticker || isNaN(quantity) || isNaN(price) || quantity <= 0 || price < 0) {
+             console.warn(`Saltando línea ${i+1}: datos inválidos.`);
+             continue;
+          }
+          
+          importedTransactions.push({ date, ticker, quantity, price });
+        }
+        
+        if (importedTransactions.length > 0) {
+            onImportTransactions(importedTransactions);
+        } else {
+            alert('No se encontraron transacciones válidas para importar.');
+        }
+
+      } catch (error) {
+        alert(`Error al procesar el archivo: ${error instanceof Error ? error.message : String(error)}`);
+      } finally {
+        if(event.target) event.target.value = '';
+      }
+    };
+    
+    reader.onerror = () => {
+        alert('Error al leer el archivo.');
+        if(event.target) event.target.value = '';
+    };
+
+    reader.readAsText(file);
   };
 
   return (
@@ -61,7 +159,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               onChange={(e) => setTicker(e.target.value)}
               className="mt-1 block w-full bg-base-300 border border-base-100 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm text-white"
               required
+              list="ticker-suggestions"
             />
+            <datalist id="ticker-suggestions">
+              {uniqueTickers.map((t) => (
+                <option key={t} value={t} />
+              ))}
+            </datalist>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -97,6 +201,28 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             Añadir Transacción
           </button>
         </form>
+      </div>
+
+      <div className="bg-base-200 p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold mb-4 text-blue-400">Datos</h2>
+        <div className="flex flex-col sm:flex-row gap-4">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".csv"
+            />
+            <button onClick={handleImportClick} className="w-full bg-secondary hover:bg-accent text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                Importar CSV
+            </button>
+            <button onClick={handleExport} className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                Exportar CSV
+            </button>
+        </div>
+        <p className="text-xs text-gray-400 mt-3">
+          El CSV debe tener las columnas: <code className="bg-base-300 p-1 rounded">date,ticker,quantity,price</code>
+        </p>
       </div>
 
       <div className="bg-base-200 p-6 rounded-lg shadow-lg">
