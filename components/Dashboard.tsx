@@ -20,8 +20,8 @@ const formatPercentage = (value: number) => `${value.toFixed(2)}%`;
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="p-2 bg-base-300 border border-base-100 rounded-md shadow-lg">
-        <p className="label font-bold">{label}</p>
+      <div className="card-compact">
+        <p className="form-label font-bold">{label}</p>
         {payload.map((p: any, i: number) => (
           <p key={i} style={{ color: p.color }}>
             {`${p.name}: ${formatCurrency(p.value)}`}
@@ -73,29 +73,29 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
   return (
     <div className="space-y-8">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <div className="bg-base-200 p-4 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-400">Valor de Cartera</h3>
-          <p className="mt-1 text-2xl font-semibold text-white">{formatCurrency(totalValue)}</p>
+      <div className="summary-cards">
+        <div className="summary-card">
+          <h3 className="summary-card-title">Valor de Cartera</h3>
+          <p className="summary-card-value">{formatCurrency(totalValue)}</p>
         </div>
-        <div className="bg-base-200 p-4 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-400">Coste Total</h3>
-          <p className="mt-1 text-2xl font-semibold text-white">{formatCurrency(totalCost)}</p>
+        <div className="summary-card">
+          <h3 className="summary-card-title">Coste Total</h3>
+          <p className="summary-card-value">{formatCurrency(totalCost)}</p>
         </div>
-        <div className="bg-base-200 p-4 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-400">G/P Total</h3>
-          <p className={`mt-1 text-2xl font-semibold ${totalPL >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(totalPL)}</p>
+        <div className="summary-card">
+          <h3 className="summary-card-title">G/P Total</h3>
+          <p className={`summary-card-value ${totalPL >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(totalPL)}</p>
         </div>
-        <div className="bg-base-200 p-4 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-400">Rentabilidad</h3>
-          <p className={`mt-1 text-2xl font-semibold ${totalPLPercentage >= 0 ? 'text-success' : 'text-danger'}`}>{formatPercentage(totalPLPercentage)}</p>
+        <div className="summary-card">
+          <h3 className="summary-card-title">Rentabilidad</h3>
+          <p className={`summary-card-value ${totalPLPercentage >= 0 ? 'positive' : 'negative'}`}>{formatPercentage(totalPLPercentage)}</p>
         </div>
       </div>
       
       {/* Charts */}
-       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <div className="bg-base-200 p-4 rounded-lg shadow-lg h-96">
-          <h3 className="font-bold text-lg mb-4 text-blue-400">Evolución de la Cartera</h3>
+       <div className="grid xl-grid-cols-2">
+        <div className="chart-container">
+          <h3 className="chart-title">Evolución de la Cartera</h3>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={portfolioHistory} margin={{ top: 5, right: 20, left: 35, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#4b5563" />
@@ -108,8 +108,8 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-base-200 p-4 rounded-lg shadow-lg h-96">
-            <h3 className="font-bold text-lg mb-4 text-blue-400">Distribución de la Cartera</h3>
+        <div className="chart-container">
+            <h3 className="chart-title">Distribución de la Cartera</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie data={portfolioDistributionData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
@@ -123,30 +123,30 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
        </div>
 
       {/* Summary Table */}
-      <div className="bg-base-200 p-6 rounded-lg shadow-lg">
-        <h3 className="font-bold text-xl mb-4 text-blue-400">Resumen por Acción</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-base-300">
-            <thead className="bg-base-300">
+      <div className="table-container">
+        <h3 className="section-title">Resumen por Acción</h3>
+        <div className="table-wrapper">
+          <table className="table">
+            <thead>
               <tr>
                 {['Ticker', 'Cantidad', 'Precio Medio', 'Coste Total', 'Precio Actual', 'Valor Actual', 'Ganancia Total', 'Ganancia Media / Acción', 'Ganancia tras Impuestos (19%)', 'Rentabilidad (%)'].map(h => (
-                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">{h}</th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-base-200 divide-y divide-base-300">
+            <tbody>
               {summaries.map(s => (
-                <tr key={s.ticker} className="hover:bg-base-300">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">{s.ticker}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{s.totalQuantity}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(s.weightedAveragePrice)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(s.totalCost)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(s.currentPrice)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(s.currentValue)}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.totalPL >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(s.totalPL)}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.averagePL >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(s.averagePL)}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.plAfterTax >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(s.plAfterTax)}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${s.totalPLPercentage >= 0 ? 'text-success' : 'text-danger'}`}>{formatPercentage(s.totalPLPercentage)}</td>
+                <tr key={s.ticker}>
+                  <td className="ticker-cell">{s.ticker}</td>
+                  <td>{s.totalQuantity}</td>
+                  <td>{formatCurrency(s.weightedAveragePrice)}</td>
+                  <td>{formatCurrency(s.totalCost)}</td>
+                  <td>{formatCurrency(s.currentPrice)}</td>
+                  <td>{formatCurrency(s.currentValue)}</td>
+                  <td className={s.totalPL >= 0 ? 'positive' : 'negative'}>{formatCurrency(s.totalPL)}</td>
+                  <td className={s.averagePL >= 0 ? 'positive' : 'negative'}>{formatCurrency(s.averagePL)}</td>
+                  <td className={s.plAfterTax >= 0 ? 'positive' : 'negative'}>{formatCurrency(s.plAfterTax)}</td>
+                  <td className={s.totalPLPercentage >= 0 ? 'positive' : 'negative'}>{formatPercentage(s.totalPLPercentage)}</td>
                 </tr>
               ))}
             </tbody>
@@ -155,40 +155,40 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
       </div>
       
       {/* Detailed Table */}
-      <div className="bg-base-200 p-6 rounded-lg shadow-lg">
-        <h3 className="font-bold text-xl mb-4 text-blue-400">Detalle de Compras</h3>
+      <div className="table-container">
+        <h3 className="section-title">Detalle de Compras</h3>
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-4">
-          <select value={tickerFilter} onChange={e => setTickerFilter(e.target.value)} className="bg-base-300 border border-base-100 rounded-md py-2 px-3 focus:outline-none">
+        <div className="filter-controls">
+          <select value={tickerFilter} onChange={e => setTickerFilter(e.target.value)} className="filter-select">
             <option value="all">Todos los Tickers</option>
             {uniqueTickers.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-base-300 border border-base-100 rounded-md py-2 px-3"/>
-          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-base-300 border border-base-100 rounded-md py-2 px-3"/>
-          <button onClick={() => { setTickerFilter('all'); setStartDate(''); setEndDate(''); }} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md">Limpiar</button>
+          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="filter-input"/>
+          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="filter-input"/>
+          <button onClick={() => { setTickerFilter('all'); setStartDate(''); setEndDate(''); }} className="btn btn-secondary">Limpiar</button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-base-300">
-            <thead className="bg-base-300">
+        <div className="table-wrapper">
+          <table className="table">
+            <thead>
               <tr>
                 {['Fecha', 'Ticker', 'Cantidad', 'Precio Compra', 'Coste', 'G/P por Operación', 'Acciones'].map(h => (
-                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">{h}</th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-base-200 divide-y divide-base-300">
+            <tbody>
               {filteredTransactions.map(t => (
-                <tr key={t.id} className="hover:bg-base-300">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{t.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">{t.ticker}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{t.quantity}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(t.price)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatCurrency(t.quantity * t.price)}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${t.pl >= 0 ? 'text-success' : 'text-danger'}`}>{formatCurrency(t.pl)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <tr key={t.id}>
+                  <td>{t.date}</td>
+                  <td className="ticker-cell">{t.ticker}</td>
+                  <td>{t.quantity}</td>
+                  <td>{formatCurrency(t.price)}</td>
+                  <td>{formatCurrency(t.quantity * t.price)}</td>
+                  <td className={t.pl >= 0 ? 'positive' : 'negative'}>{formatCurrency(t.pl)}</td>
+                  <td>
                     <div className="flex items-center gap-4">
-                      <button onClick={() => setEditingTransaction(t)} className="text-accent hover:text-blue-400 transition duration-150">Editar</button>
-                      <button onClick={() => onDeleteTransaction(t.id)} className="text-danger hover:text-red-400 transition duration-150">Eliminar</button>
+                      <button onClick={() => setEditingTransaction(t)} className="btn btn-ghost text-sm">Editar</button>
+                      <button onClick={() => onDeleteTransaction(t.id)} className="btn btn-ghost text-sm">Eliminar</button>
                     </div>
                   </td>
                 </tr>

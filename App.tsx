@@ -75,11 +75,11 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 text-neutral p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="app-container">
+      <div className="max-width-container">
         <Header />
-        <main className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-          <div className="lg:col-span-1">
+        <main className="grid lg-grid-cols-3 mt-8">
+          <div className="lg-col-span-1">
             <ControlPanel
               onAddTransaction={addTransaction}
               onImportTransactions={importTransactions}
@@ -89,7 +89,7 @@ const App: React.FC = () => {
               onUpdatePrice={updateCurrentPrice}
             />
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg-col-span-2">
             <Dashboard 
               transactions={transactions} 
               currentPrices={currentPrices}
@@ -107,7 +107,7 @@ const App: React.FC = () => {
       >
         <p>¿Estás seguro de que quieres eliminar esta transacción?</p>
         {transactionToDelete && (
-          <div className="mt-4 p-3 bg-base-300 rounded-md text-sm">
+          <div className="mt-4 p-3 card-compact">
             <p><span className="font-bold">Fecha:</span> {transactionToDelete.date}</p>
             <p><span className="font-bold">Ticker:</span> {transactionToDelete.ticker}</p>
             <p><span className="font-bold">Cantidad:</span> {transactionToDelete.quantity}</p>
