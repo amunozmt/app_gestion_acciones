@@ -48,9 +48,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       alert('No hay transacciones para exportar.');
       return;
     }
-    const headers = 'date,ticker,quantity,price,commission';
+    const headers = 'date,ticker,quantity,price';
     const csvContent = transactions
-      .map(t => `${t.date},${t.ticker},${t.quantity},${t.price},${t.commission || 0}`)
+      .map(t => `${t.date},${t.ticker},${t.quantity},${t.price}`)
       .join('\n');
     
     const csvData = `${headers}\n${csvContent}`;
@@ -245,7 +245,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </button>
         </div>
         <p className="text-xs mt-3">
-          El CSV debe tener las columnas: <code>date,ticker,quantity,price,commission</code> (commission es opcional)
+          El CSV debe tener las columnas: <code>date,ticker,quantity,price</code> (commission es opcional)
         </p>
       </div>
 

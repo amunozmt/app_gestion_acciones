@@ -196,7 +196,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
           <button onClick={() => { setTickerFilter('all'); setStartDate(''); setEndDate(''); }} className="btn btn-secondary">Limpiar</button>
         </div>
         <div className="table-wrapper">
-          <table className="table">
+          <table className="table table-large">
             <thead>
               <tr>
                 {['Fecha', 'Ticker', 'Cantidad', 'Precio', 'Comisión', 'Coste Total', 'G/P por Operación', 'Acciones'].map(h => (

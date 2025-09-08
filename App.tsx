@@ -8,20 +8,20 @@ import ConfirmationModal from './components/ConfirmationModal';
 import { useLocalStorage } from './hooks/useLocalStorage';
 
 const initialTransactions: Transaction[] = [
-  { id: '1', date: '2023-01-15', ticker: 'AAPL', quantity: 10, price: 150.00, commission: 1.50 },
-  { id: '2', date: '2023-03-22', ticker: 'GOOGL', quantity: 5, price: 105.50, commission: 0.99 },
-  { id: '3', date: '2023-06-05', ticker: 'AAPL', quantity: 5, price: 175.25, commission: 1.00 },
-  { id: '4', date: '2023-08-10', ticker: 'MSFT', quantity: 8, price: 320.00, commission: 2.50 },
-  { id: '5', date: '2024-01-20', ticker: 'GOOGL', quantity: 3, price: 140.75, commission: 0.75 },
-  { id: '6', date: '2024-02-15', ticker: 'AAPL', quantity: -3, price: 180.00, commission: 1.25 }, // Sale example
+  { id: '1', date: '2025-07-11', ticker: 'ORO', quantity: 0.034021, price: 2909.94, commission: 0 },
+  { id: '2', date: '2025-07-14', ticker: 'NVIDIA', quantity: 0.99758162, price: 165.4, commission: 0 },
+  { id: '3', date: '2025-08-18', ticker: 'S&P500', quantity: 1.09313511, price: 9.15, commission: 0 },
+  { id: '4', date: '2025-08-18', ticker: 'S&P500', quantity: 1.09313511, price: 9.15, commission: 0 },
+  { id: '5', date: '2025-08-31', ticker: 'ORO', quantity: 0.066619, price: 2987.13, commission: 0 },
+  { id: '6', date: '2025-09-03', ticker: 'S&P500', quantity: 21.85147552, price: 9.15, commission: 0 },
 ];
 
 const App: React.FC = () => {
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>('portfolio-transactions', initialTransactions);
   const [currentPrices, setCurrentPrices] = useLocalStorage<Record<string, number>>('portfolio-current-prices', {
-    'AAPL': 190.50,
-    'GOOGL': 155.20,
-    'MSFT': 370.80,
+    'ORO': 2909.94,
+    'NVIDIA': 165.4,
+    'S&P500': 9.15,
   });
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
 
