@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rastreador de Cartera de Acciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary': '#1e40af',
+              'secondary': '#1d4ed8',
+              'accent': '#3b82f6',
+              'success': '#16a34a',
+              'danger': '#dc2626',
+              'neutral': '#f8fafc',
+              'base-100': '#1f2937',
+              'base-200': '#374151',
+              'base-300': '#4b5563',
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.1.2"
+  }
+}
+</script>
+</head>
+  <body class="bg-base-100 text-neutral">
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "name": "Rastreador de Cartera de Acciones",
+  "description": "Una aplicación para registrar compras de acciones, seguir su rendimiento y visualizar la distribución de la cartera con precios de mercado personalizables.",
+  "requestFramePermissions": []
+}
