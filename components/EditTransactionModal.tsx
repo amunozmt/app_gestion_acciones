@@ -15,7 +15,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ transaction
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'quantity' || name === 'price' ? parseFloat(value) || 0 : value,
+      [name]: name === 'quantity' || name === 'price' || name === 'commission' ? parseFloat(value) || 0 : value,
     }));
   };
 
@@ -72,11 +72,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ transaction
                 placeholder="0"
                 value={formData.quantity}
                 onChange={handleChange}
-                min="0"
-                step="any"
+                step="0.000001"
                 className="form-input"
                 required
               />
+              <small className="text-xs text-gray-500">Positivo: compra, Negativo: venta</small>
             </div>
             <div className="form-group">
               <label htmlFor="edit-price" className="form-label">Precio/Acción</label>
@@ -84,15 +84,29 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({ transaction
                 type="number"
                 id="edit-price"
                 name="price"
-                placeholder="0.00"
+                placeholder="0.000000"
                 value={formData.price}
                 onChange={handleChange}
                 min="0"
-                step="any"
+                step="0.000001"
                 className="form-input"
                 required
               />
             </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="edit-commission" className="form-label">Comisión (opcional)</label>
+            <input
+              type="number"
+              id="edit-commission"
+              name="commission"
+              placeholder="0.00"
+              value={formData.commission || 0}
+              onChange={handleChange}
+              min="0"
+              step="0.01"
+              className="form-input"
+            />
           </div>
           <div className="modal-actions">
              <button type="button" onClick={onClose} className="btn btn-secondary">

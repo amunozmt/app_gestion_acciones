@@ -5,21 +5,23 @@ import Header from './components/Header';
 import ControlPanel from './components/ControlPanel';
 import Dashboard from './components/Dashboard';
 import ConfirmationModal from './components/ConfirmationModal';
+import { useLocalStorage } from './hooks/useLocalStorage';
 
 const initialTransactions: Transaction[] = [
-  { id: '1', date: '2023-01-15', ticker: 'AAPL', quantity: 10, price: 150.00 },
-  { id: '2', date: '2023-03-22', ticker: 'GOOGL', quantity: 5, price: 105.50 },
-  { id: '3', date: '2023-06-05', ticker: 'AAPL', quantity: 5, price: 175.25 },
-  { id: '4', date: '2023-08-10', ticker: 'MSFT', quantity: 8, price: 320.00 },
-  { id: '5', date: '2024-01-20', ticker: 'GOOGL', quantity: 3, price: 140.75 },
+  { id: '1', date: '2025-07-11', ticker: 'ORO', quantity: 0.034021, price: 2909.94, commission: 0 },
+  { id: '2', date: '2025-07-14', ticker: 'NVIDIA', quantity: 0.99758162, price: 165.4, commission: 0 },
+  { id: '3', date: '2025-08-18', ticker: 'S&P500', quantity: 1.09313511, price: 9.15, commission: 0 },
+  { id: '4', date: '2025-08-18', ticker: 'S&P500', quantity: 1.09313511, price: 9.15, commission: 0 },
+  { id: '5', date: '2025-08-31', ticker: 'ORO', quantity: 0.066619, price: 2987.13, commission: 0 },
+  { id: '6', date: '2025-09-03', ticker: 'S&P500', quantity: 21.85147552, price: 9.15, commission: 0 },
 ];
 
 const App: React.FC = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
-  const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({
-    'AAPL': 190.50,
-    'GOOGL': 155.20,
-    'MSFT': 370.80,
+  const [transactions, setTransactions] = useLocalStorage<Transaction[]>('portfolio-transactions', initialTransactions);
+  const [currentPrices, setCurrentPrices] = useLocalStorage<Record<string, number>>('portfolio-current-prices', {
+    'ORO': 2909.94,
+    'NVIDIA': 165.4,
+    'S&P500': 9.15,
   });
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
 
@@ -111,7 +113,10 @@ const App: React.FC = () => {
             <p><span className="font-bold">Fecha:</span> {transactionToDelete.date}</p>
             <p><span className="font-bold">Ticker:</span> {transactionToDelete.ticker}</p>
             <p><span className="font-bold">Cantidad:</span> {transactionToDelete.quantity}</p>
-            <p><span className="font-bold">Precio:</span> {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(transactionToDelete.price)}</p>
+            <p><span className="font-bold">Precio:</span> {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(transactionToDelete.price)}</p>
+            {transactionToDelete.commission && transactionToDelete.commission > 0 && (
+              <p><span className="font-bold">Comisión:</span> {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(transactionToDelete.commission)}</p>
+            )}
           </div>
         )}
       </ConfirmationModal>

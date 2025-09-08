@@ -11,10 +11,21 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
     return uniqueTickers.map(ticker => {
       const tickerTransactions = transactions.filter(t => t.ticker === ticker);
       const totalQuantity = tickerTransactions.reduce((sum, t) => sum + t.quantity, 0);
-      const totalCost = tickerTransactions.reduce((sum, t) => sum + (t.quantity * t.price), 0);
-      const weightedAveragePrice = totalQuantity > 0 ? totalCost / totalQuantity : 0;
+      
+      // Calculate weighted average price only for buys (positive quantities)
+      const buyTransactions = tickerTransactions.filter(t => t.quantity > 0);
+      const totalBuyCost = buyTransactions.reduce((sum, t) => sum + (t.quantity * t.price) + (t.commission || 0), 0);
+      const totalBuyQuantity = buyTransactions.reduce((sum, t) => sum + t.quantity, 0);
+      const weightedAveragePrice = totalBuyQuantity > 0 ? totalBuyCost / totalBuyQuantity : 0;
+      
+      // Calculate total cost including commissions
+      const totalCost = tickerTransactions.reduce((sum, t) => {
+        const transactionCost = Math.abs(t.quantity) * t.price + (t.commission || 0);
+        return sum + (t.quantity > 0 ? transactionCost : 0); // Only count buys for total cost
+      }, 0);
+      
       const currentPrice = currentPrices[ticker] || 0;
-      const currentValue = totalQuantity * currentPrice;
+      const currentValue = Math.max(0, totalQuantity) * currentPrice; // Only positive holdings have value
       const totalPL = currentValue - totalCost;
       const totalPLPercentage = totalCost > 0 ? (totalPL / totalCost) * 100 : 0;
       const averagePL = totalQuantity > 0 ? currentPrice - weightedAveragePrice : 0;
@@ -38,9 +49,9 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
   const transactionsWithPL = useMemo<TransactionWithPL[]>(() => {
     return transactions.map(t => {
       const currentPrice = currentPrices[t.ticker] || 0;
-      const currentValue = t.quantity * currentPrice;
-      const cost = t.quantity * t.price;
-      const pl = currentValue - cost;
+      const currentValue = Math.abs(t.quantity) * currentPrice;
+      const cost = Math.abs(t.quantity) * t.price + (t.commission || 0);
+      const pl = t.quantity > 0 ? currentValue - cost : cost - currentValue; // For sales, profit is sale price minus original cost
       
       return {
         ...t,
@@ -64,13 +75,20 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
             portfolio[t.ticker] = { quantity: 0, cost: 0 };
         }
         portfolio[t.ticker].quantity += t.quantity;
-        portfolio[t.ticker].cost += t.quantity * t.price;
+        const transactionCost = Math.abs(t.quantity) * t.price + (t.commission || 0);
+        if (t.quantity > 0) {
+          portfolio[t.ticker].cost += transactionCost;
+        } else {
+          // For sales, reduce cost proportionally
+          const saleRatio = Math.abs(t.quantity) / (portfolio[t.ticker].quantity + Math.abs(t.quantity));
+          portfolio[t.ticker].cost = Math.max(0, portfolio[t.ticker].cost * (1 - saleRatio));
+        }
 
         let totalValue = 0;
         let totalCost = 0;
         for (const ticker in portfolio) {
             totalCost += portfolio[ticker].cost;
-            totalValue += portfolio[ticker].quantity * (currentPrices[ticker] || 0);
+            totalValue += Math.max(0, portfolio[ticker].quantity) * (currentPrices[ticker] || 0);
         }
 
         history.push({
@@ -97,6 +115,21 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
   const totalPL = totals.totalValue - totals.totalCost;
   const totalPLPercentage = totals.totalCost > 0 ? (totalPL / totals.totalCost) * 100 : 0;
 
+  // Calculate sales summary
+  const salesSummary = useMemo(() => {
+    const salesTransactions = transactions.filter(t => t.quantity < 0);
+    const totalSalesQuantity = salesTransactions.reduce((sum, t) => sum + Math.abs(t.quantity), 0);
+    const totalSalesValue = salesTransactions.reduce((sum, t) => sum + (Math.abs(t.quantity) * t.price) - (t.commission || 0), 0);
+    const totalSalesCommissions = salesTransactions.reduce((sum, t) => sum + (t.commission || 0), 0);
+    
+    return {
+      totalSalesQuantity,
+      totalSalesValue,
+      totalSalesCommissions,
+      salesCount: salesTransactions.length,
+    };
+  }, [transactions]);
+
   return { 
     summaries, 
     transactionsWithPL, 
@@ -104,6 +137,7 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
     totalCost: totals.totalCost,
     totalValue: totals.totalValue,
     totalPL,
-    totalPLPercentage
+    totalPLPercentage,
+    salesSummary
   };
 };

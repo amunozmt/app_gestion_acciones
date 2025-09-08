@@ -23,6 +23,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   const [ticker, setTicker] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('');
   const [price, setPrice] = useState<string>('');
+  const [commission, setCommission] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,10 +34,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         ticker: ticker.toUpperCase(),
         quantity: parseFloat(quantity),
         price: parseFloat(price),
+        commission: commission ? parseFloat(commission) : 0,
       });
       setTicker('');
       setQuantity('');
       setPrice('');
+      setCommission('');
     }
   };
 
@@ -83,12 +86,19 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         const headerLine = lines[0].trim().toLowerCase().split(',').map(h => h.trim());
         const requiredHeaders = ['date', 'ticker', 'quantity', 'price'];
+        const optionalHeaders = ['commission'];
         
         const headerIndices: Record<string, number> = {};
         requiredHeaders.forEach(h => {
           const index = headerLine.indexOf(h);
           if (index === -1) throw new Error(`Falta la columna requerida en el CSV: ${h}`);
           headerIndices[h] = index;
+        });
+        
+        // Handle optional headers
+        optionalHeaders.forEach(h => {
+          const index = headerLine.indexOf(h);
+          if (index !== -1) headerIndices[h] = index;
         });
 
         const importedTransactions: Omit<Transaction, 'id'>[] = [];
@@ -103,13 +113,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           const ticker = values[headerIndices.ticker].trim().toUpperCase();
           const quantity = parseFloat(values[headerIndices.quantity]);
           const price = parseFloat(values[headerIndices.price]);
+          const commission = headerIndices.commission !== undefined ? parseFloat(values[headerIndices.commission]) || 0 : 0;
 
-          if (!date || !ticker || isNaN(quantity) || isNaN(price) || quantity <= 0 || price < 0) {
+          if (!date || !ticker || isNaN(quantity) || isNaN(price) || quantity === 0 || price < 0) {
              console.warn(`Saltando línea ${i+1}: datos inválidos.`);
              continue;
           }
           
-          importedTransactions.push({ date, ticker, quantity, price });
+          importedTransactions.push({ date, ticker, quantity, price, commission });
         }
         
         if (importedTransactions.length > 0) {
@@ -136,7 +147,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   return (
     <div className="control-panel">
       <div className="card">
-        <h2 className="section-title">Registrar Compra</h2>
+        <h2 className="section-title">Registrar Transacción</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-group">
             <label htmlFor="date" className="form-label">Fecha</label>
@@ -176,26 +187,39 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 placeholder="0"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                min="0"
-                step="any"
+                step="0.000001"
                 className="form-input"
                 required
               />
+              <small className="text-xs text-gray-500">Positivo: compra, Negativo: venta</small>
             </div>
             <div className="form-group">
               <label htmlFor="price" className="form-label">Precio/Acción</label>
               <input
                 type="number"
                 id="price"
-                placeholder="0.00"
+                placeholder="0.000000"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 min="0"
-                step="any"
+                step="0.000001"
                 className="form-input"
                 required
               />
             </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="commission" className="form-label">Comisión (opcional)</label>
+            <input
+              type="number"
+              id="commission"
+              placeholder="0.00"
+              value={commission}
+              onChange={(e) => setCommission(e.target.value)}
+              min="0"
+              step="0.01"
+              className="form-input"
+            />
           </div>
           <button type="submit" className="btn btn-primary btn-full">
             Añadir Transacción
@@ -221,7 +245,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </button>
         </div>
         <p className="text-xs mt-3">
-          El CSV debe tener las columnas: <code>date,ticker,quantity,price</code>
+          El CSV debe tener las columnas: <code>date,ticker,quantity,price</code> (commission es opcional)
         </p>
       </div>
 
