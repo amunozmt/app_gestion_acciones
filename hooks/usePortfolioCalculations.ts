@@ -112,8 +112,63 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
     }, { totalCost: 0, totalValue: 0 });
   }, [summaries]);
 
-  const totalPL = totals.totalValue - totals.totalCost;
+  // Calculate realized gains from sales
+  const realizedGains = useMemo(() => {
+    let totalRealizedPL = 0;
+    const tickerData: Record<string, { remainingShares: number; totalCost: number; }> = {};
+
+    // Sort transactions by date to process them chronologically
+    const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    for (const transaction of sortedTransactions) {
+      const { ticker, quantity, price, commission = 0 } = transaction;
+      
+      if (!tickerData[ticker]) {
+        tickerData[ticker] = { remainingShares: 0, totalCost: 0 };
+      }
+
+      if (quantity > 0) {
+        // Buy transaction
+        tickerData[ticker].remainingShares += quantity;
+        tickerData[ticker].totalCost += (quantity * price) + commission;
+      } else {
+        // Sale transaction
+        const saleQuantity = Math.abs(quantity);
+        const saleValue = (saleQuantity * price) - commission;
+        
+        if (tickerData[ticker].remainingShares > 0) {
+          // Calculate average cost per share for the remaining shares
+          const avgCostPerShare = tickerData[ticker].totalCost / tickerData[ticker].remainingShares;
+          
+          // Calculate how many shares we can sell (minimum of what we want to sell and what we have)
+          const sharesToSell = Math.min(saleQuantity, tickerData[ticker].remainingShares);
+          
+          // Calculate cost basis for the sold shares
+          const costBasisForSale = sharesToSell * avgCostPerShare;
+          
+          // Calculate realized P&L for this sale
+          const realizedPLForSale = (sharesToSell * price) - commission - costBasisForSale;
+          totalRealizedPL += realizedPLForSale;
+          
+          // Update remaining shares and cost
+          tickerData[ticker].remainingShares -= sharesToSell;
+          if (tickerData[ticker].remainingShares > 0) {
+            tickerData[ticker].totalCost -= costBasisForSale;
+          } else {
+            tickerData[ticker].totalCost = 0;
+          }
+        }
+      }
+    }
+
+    return totalRealizedPL;
+  }, [transactions]);
+
+  const totalPL = totals.totalValue - totals.totalCost + realizedGains;
   const totalPLPercentage = totals.totalCost > 0 ? (totalPL / totals.totalCost) * 100 : 0;
+
+  // Calculate unrealized P&L (current holdings only)
+  const unrealizedPL = totals.totalValue - totals.totalCost;
 
   // Calculate sales summary
   const salesSummary = useMemo(() => {
@@ -138,6 +193,8 @@ export const usePortfolioCalculations = (transactions: Transaction[], currentPri
     totalValue: totals.totalValue,
     totalPL,
     totalPLPercentage,
+    realizedGains,
+    unrealizedPL,
     salesSummary
   };
 };

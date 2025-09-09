@@ -47,6 +47,8 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
     totalValue,
     totalPL,
     totalPLPercentage,
+    realizedGains,
+    unrealizedPL,
     salesSummary
   } = usePortfolioCalculations(transactions, currentPrices);
   
@@ -95,6 +97,18 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, currentPrices, onUp
         <div className="summary-card">
           <h3 className="summary-card-title">Rentabilidad</h3>
           <p className={`summary-card-value ${totalPLPercentage >= 0 ? 'positive' : 'negative'}`}>{formatPercentage(totalPLPercentage)}</p>
+        </div>
+      </div>
+
+      {/* Additional P&L Breakdown */}
+      <div className="summary-cards">
+        <div className="summary-card">
+          <h3 className="summary-card-title">Ganancias Realizadas</h3>
+          <p className={`summary-card-value ${realizedGains >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(realizedGains)}</p>
+        </div>
+        <div className="summary-card">
+          <h3 className="summary-card-title">Ganancias No Realizadas</h3>
+          <p className={`summary-card-value ${unrealizedPL >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(unrealizedPL)}</p>
         </div>
       </div>
       
